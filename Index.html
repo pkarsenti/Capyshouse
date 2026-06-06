@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Cappy's Valley 🐾</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; touch-action:none; -webkit-tap-highlight-color:transparent; }
+:root {
+  --ui-bg: rgba(255,245,220,0.95);
+  --ui-border: #d4a853;
+  --wall: #c8a060;
+  --wall-dark: #9a7030;
+  --wood: #c89050;
+}
+body { width:100vw; height:100vh; overflow:hidden; font-family:'Fredoka One',cursive; background:#5aaa28; }
+
+/* ══ SHARED CAPPY ══ */
+#cappy {
+  position:fixed; width:58px; height:58px; z-index:500; pointer-events:none;
+  font-size:44px; display:flex; align-items:center; justify-content:center;
+  filter:drop-shadow(0 5px 8px rgba(0,0,0,0.32));
+  transition: left 0s, top 0s;
+}
+#cappy-emoji { display:block; }
+#cappy.moving #cappy-emoji { animation:cappyWalk 0.28s steps(2) infinite; }
+@keyframes cappyWalk { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+/* ══ OUTDOOR WORLD ══ */
+#gameContainer { position:fixed; inset:0; overflow:hidden; display:block; }
+#world { position:absolute; width:3200px; height:2400px; top:0; left:0; will-change:transform; }
+
+/* outdoor terrain */
+.bg-base { position:absolute; }
+.grass     { background:#5aaa32; }
+.grass-med { background:#4e9a28; }
+.grass-drk { background:#3d7a1c; }
+.grass-lt  { background:#70c040; }
+.dirt      { background:#c09050; }
+.dirt-drk  { background:#a07030; }
+.sand      { background:#e0c878; }
+.forest-floor { background:#2e6018; }
+.cliff-face { background:linear-gradient(180deg,#b89060,#8a6030 60%,#6a4820); border-top:5px solid #d0a870; }
+.cliff-top  { background:#7ab030; border-bottom:4px solid #c09850; }
+.water-body { background:linear-gradient(135deg,#3aaad8,#6dcef0 40%,#3aaad8); animation:waterShimmer 2.5s ease-in-out infinite alternate; }
+.water-edge { background:rgba(100,220,255,0.35); border-radius:50%; }
+@keyframes waterShimmer { 0%{filter:brightness(1)} 100%{filter:brightness(1.18) hue-rotate(8deg)} }
+.mud-pool { background:radial-gradient(ellipse,#6a4020,#4a2c10); border-radius:55% 45% 50% 50%; border:5px solid #8a5830; }
+.path-h,.path-v { position:absolute; background:#c8a055; border-radius:6px; box-shadow:inset 0 2px 0 rgba(255,255,255,0.18),inset 0 -2px 0 rgba(0,0,0,0.12); }
+.path-h::after,.path-v::after { content:''; position:absolute; inset:0; border-radius:6px;
+  background:repeating-linear-gradient(90deg,transparent 0,transparent 24px,rgba(180,140,60,0.4) 24px,rgba(180,140,60,0.4) 28px); }
+.path-v::after { background:repeating-linear-gradient(180deg,transparent 0,transparent 24px,rgba(180,140,60,0.4) 24px,rgba(180,140,60,0.4) 28px); }
+.farm-row { position:absolute; height:18px; border-radius:4px;
+  background:repeating-linear-gradient(90deg,#5aaa32 0,#5aaa32 30px,#a07030 30px,#a07030 46px); }
+
+/* outdoor trees / nature */
+.tree { position:absolute; display:flex; flex-direction:column; align-items:center; pointer-events:none; z-index:10; }
+.tree-top { background:#4a8c2a; border-radius:50% 50% 40% 40%; box-shadow:0 5px 0 rgba(0,0,0,0.18),inset -6px -4px 0 rgba(0,0,0,0.1); animation:treeSway 3s ease-in-out infinite; transform-origin:bottom center; }
+.tree-trunk { background:#8b6040; border-radius:3px; }
+.tree-shadow { position:absolute; background:rgba(0,0,0,0.1); border-radius:50%; bottom:-4px; }
+@keyframes treeSway { 0%,100%{transform:rotate(-1.2deg)} 50%{transform:rotate(1.2deg)} }
+.tree-big .tree-top{width:88px;height:100px;} .tree-big .tree-trunk{width:20px;height:32px;} .tree-big .tree-shadow{width:80px;height:18px;left:-30px;}
+.tree-med .tree-top{width:66px;height:76px;}  .tree-med .tree-trunk{width:15px;height:24px;} .tree-med .tree-shadow{width:60px;height:14px;left:-22px;}
+.tree-sm  .tree-top{width:48px;height:56px;}  .tree-sm  .tree-trunk{width:11px;height:17px;} .tree-sm  .tree-shadow{width:44px;height:10px;left:-16px;}
+.tree-autumn .tree-top { background:#c86020; }
+.tree-blossom .tree-top { background:#e090c0; }
+.bush { position:absolute; border-radius:50%; pointer-events:none; }
+.bush-grn   { background:radial-gradient(circle at 40% 35%,#70c040,#3d8818); }
+.bush-drk   { background:radial-gradient(circle at 40% 35%,#508030,#2a5c10); }
+.rock { position:absolute; border-radius:55% 45% 50% 55%; pointer-events:none; background:radial-gradient(circle at 35% 30%,#b0a090,#7a6a5a); box-shadow:2px 4px 0 rgba(0,0,0,0.2); }
+.flower { position:absolute; font-size:22px; animation:flowerBob 2.5s ease-in-out infinite; pointer-events:none; }
+@keyframes flowerBob { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-5px) rotate(3deg)} }
+.mushroom { position:absolute; font-size:20px; pointer-events:none; animation:flowerBob 3s ease-in-out infinite; }
+.bridge { position:absolute; background:repeating-linear-gradient(90deg,#a07840 0,#a07840 20px,#7a5c28 20px,#7a5c28 24px); border-top:7px solid #c8a050; border-bottom:7px solid #7a5c28; border-radius:4px; z-index:15; }
+.bridge-rope-t,.bridge-rope-b { position:absolute; width:100%; border-top:3px dashed rgba(200,160,80,0.8); }
+.bridge-rope-t { top:-10px; } .bridge-rope-b { bottom:-10px; }
+.rope-ladder { position:absolute; display:flex; flex-direction:column; align-items:center; z-index:12; }
+.ladder-rung { width:38px; height:9px; background:#a07840; border-radius:5px; border:2px solid #7a5c28; position:relative; margin:5px 0; }
+.ladder-rung::before,.ladder-rung::after { content:''; position:absolute; width:5px; height:22px; background:#c8a060; top:-7px; border-radius:2px; }
+.ladder-rung::before{left:4px;} .ladder-rung::after{right:4px;}
+.cappy-hole { position:absolute; width:56px; height:30px; background:radial-gradient(ellipse,#1a0a02,#4a2810 70%,#6a3e20); border-radius:50%; border:5px solid #8a5830; box-shadow:inset 0 5px 10px rgba(0,0,0,0.6); z-index:20; }
+.cappy-hole::after { content:'🌀'; position:absolute; font-size:16px; top:50%; left:50%; transform:translate(-50%,-50%); animation:holeSpin 3s linear infinite; opacity:0.65; }
+@keyframes holeSpin { from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)} }
+.cloud { position:absolute; background:white; border-radius:50px; opacity:0.88; animation:cloudDrift linear infinite; z-index:5; }
+@keyframes cloudDrift { 0%{transform:translateX(0)} 100%{transform:translateX(80px)} }
+.animal { position:absolute; font-size:34px; cursor:pointer; z-index:30; animation:animalIdle 3s ease-in-out infinite; user-select:none; filter:drop-shadow(0 3px 4px rgba(0,0,0,0.2)); }
+.animal.wander { animation:animalWander 9s ease-in-out infinite; }
+@keyframes animalIdle { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes animalWander { 0%,100%{transform:translateX(0)} 25%{transform:translateX(22px)} 75%{transform:translateX(-18px)} }
+.star { position:absolute; font-size:30px; cursor:pointer; z-index:50; animation:starFloat 2s ease-in-out infinite; filter:drop-shadow(0 0 10px gold); }
+@keyframes starFloat { 0%,100%{transform:translateY(0) rotate(-12deg)} 50%{transform:translateY(-9px) rotate(12deg)} }
+.star.collected { animation:starCollect 0.5s ease-out forwards; pointer-events:none; }
+@keyframes starCollect { 0%{transform:scale(1);opacity:1} 100%{transform:scale(3) translateY(-40px);opacity:0} }
+@keyframes butterflyFly {
+  0%{transform:translate(0,0) rotate(0deg)} 25%{transform:translate(45px,-35px) rotate(18deg)}
+  50%{transform:translate(90px,12px) rotate(-12deg)} 75%{transform:translate(35px,45px) rotate(6deg)} 100%{transform:translate(0,0) rotate(0deg)} }
+
+/* ══ HOUSE WORLD ══ */
+#houseContainer { position:fixed; inset:0; overflow:hidden; display:none; z-index:400; }
+#houseContainer.visible { display:block; }
+#houseWorld { position:absolute; width:2800px; height:1200px; top:0; left:0; will-change:transform; }
+
+/* House base & walls */
+.hw-bg      { position:absolute; }
+.hw-wall    { position:absolute; background:var(--wall); }
+.hw-wall-v  { position:absolute; background:var(--wall); }
+/* floors */
+.hw-wood    { background:repeating-linear-gradient(90deg,#d4984a 0,#d4984a 56px,#b87c38 56px,#b87c38 60px); }
+.hw-tile-b  { background:repeating-linear-gradient(45deg,#a8d4f0 0,#a8d4f0 28px,#88b8d8 28px,#88b8d8 30px); }
+.hw-tile-p  { background:repeating-linear-gradient(45deg,#f0b8d4 0,#f0b8d4 28px,#d898b8 28px,#d898b8 30px); }
+.hw-carpet  { background:radial-gradient(ellipse at 30% 30%,#e87050 0%,#c04830 100%); }
+.hw-lego    { background:repeating-linear-gradient(90deg,#e82020 0,#e82020 32px,#2050d0 32px,#2050d0 64px,#f0c010 64px,#f0c010 96px,#20a820 96px,#20a820 128px); }
+.hw-secret  { background:radial-gradient(ellipse at 50% 40%,#1a0a40 0%,#08021a 100%); }
+.hw-grass   { background:radial-gradient(ellipse at 30% 30%,#70c040 0%,#3a8010 100%); }
+
+/* furniture */
+.furn { position:absolute; font-size:44px; pointer-events:none; z-index:10; }
+.furn-big { font-size:60px; }
+.furn-sm  { font-size:28px; }
+/* interactive spots */
+.hspot {
+  position:absolute; z-index:20; cursor:pointer; font-size:44px;
+  animation:animalIdle 3s ease-in-out infinite;
+  filter:drop-shadow(0 3px 5px rgba(0,0,0,0.18));
+}
+.hspot:active { transform:scale(1.25) !important; }
+/* wall decorations */
+.wallart { position:absolute; font-size:32px; pointer-events:none; z-index:8; opacity:0.85; }
+/* windows */
+.hw-window {
+  position:absolute; z-index:8;
+  background:linear-gradient(135deg,#c0e8ff 0%,#e8f8ff 50%,#b0d8f0 100%);
+  border:6px solid #c8a050; border-radius:8px;
+  box-shadow:inset 0 0 14px rgba(100,200,255,0.5), 0 3px 8px rgba(0,0,0,0.15);
+}
+.hw-window::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg,transparent 48%,rgba(255,255,255,0.4) 48%,rgba(255,255,255,0.4) 52%,transparent 52%),linear-gradient(0deg,transparent 48%,rgba(255,255,255,0.4) 48%,rgba(255,255,255,0.4) 52%,transparent 52%); border-radius:3px; }
+/* curtains */
+.curtain-l,.curtain-r { position:absolute; top:0; height:100%; width:28%; background:repeating-linear-gradient(180deg,#ff9090 0,#ff9090 8px,#ff6060 8px,#ff6060 16px); border-radius:4px; opacity:0.85; z-index:9; }
+.curtain-l { left:0; border-radius:4px 0 0 4px; }
+.curtain-r { right:0; border-radius:0 4px 4px 0; }
+
+/* room labels */
+.room-name { position:absolute; top:14px; left:50%; transform:translateX(-50%); font-size:18px; color:rgba(80,40,10,0.55); white-space:nowrap; pointer-events:none; z-index:25; letter-spacing:0.5px; }
+
+/* indoor stars */
+.istar { position:absolute; font-size:28px; z-index:60; animation:starFloat 2s ease-in-out infinite; filter:drop-shadow(0 0 8px gold); cursor:pointer; }
+
+/* exit button */
+#exitBtn {
+  position:fixed; top:18px; right:28px;
+  background:var(--ui-bg); border:4px solid var(--ui-border); border-radius:50px;
+  padding:10px 22px; font-family:'Fredoka One',cursive; font-size:20px; color:#5a3820;
+  cursor:pointer; z-index:800; box-shadow:0 4px 14px rgba(0,0,0,0.15);
+  display:none;
+}
+#exitBtn.visible { display:block; }
+
+/* ══ HUD ══ */
+#hud {
+  position:fixed; top:18px; left:50%; transform:translateX(-50%);
+  display:flex; align-items:center; gap:14px;
+  background:var(--ui-bg); border:4px solid var(--ui-border);
+  border-radius:50px; padding:10px 26px; z-index:600;
+  box-shadow:0 4px 18px rgba(0,0,0,0.16);
+}
+.htitle { font-size:22px; color:#5a3820; }
+#starCount { font-family:'Nunito',sans-serif; font-weight:900; font-size:22px; color:#c07800; }
+
+/* ══ ZONE LABEL ══ */
+#zoneLabel { position:fixed; top:86px; left:50%; transform:translateX(-50%); font-size:19px; color:white; text-shadow:0 2px 8px rgba(0,0,0,0.45); opacity:0; transition:opacity 0.5s; pointer-events:none; z-index:600; letter-spacing:1px; }
+#zoneLabel.show { opacity:1; }
+
+/* ══ SPEECH BUBBLE ══ */
+#speech {
+  position:fixed; background:var(--ui-bg); border:4px solid var(--ui-border);
+  border-radius:22px; padding:14px 22px;
+  font-family:'Nunito',sans-serif; font-weight:700; font-size:21px; color:#5a3820;
+  max-width:380px; text-align:center; z-index:700;
+  opacity:0; pointer-events:none; box-shadow:0 8px 28px rgba(0,0,0,0.18);
+  top:22%; left:50%; transform:translateX(-50%) scale(0.7);
+  transition:opacity 0.2s, transform 0.2s; transform-origin:bottom center;
+}
+#speech.show { opacity:1; transform:translateX(-50%) scale(1); }
+#speech::after { content:''; position:absolute; bottom:-18px; left:34px; border:10px solid transparent; border-top-color:var(--ui-border); }
+
+/* ══ POPUP ══ */
+#popup {
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
+  background:var(--ui-bg); border:5px solid var(--ui-border); border-radius:26px;
+  padding:18px 34px; font-size:27px; color:#5a3820; text-align:center; z-index:700;
+  pointer-events:none; box-shadow:0 12px 44px rgba(0,0,0,0.22);
+  transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+}
+#popup.show { transform:translate(-50%,-50%) scale(1); }
+
+/* ══ WHEEE ══ */
+.wheee { position:fixed; font-size:38px; color:#ff6baa; text-shadow:0 0 12px #ffaacc; pointer-events:none; z-index:900; animation:wheeeAnim 1.3s ease-out forwards; left:50%; top:50%; }
+@keyframes wheeeAnim { 0%{transform:translate(-50%,-50%) scale(0) rotate(-10deg);opacity:1} 60%{transform:translate(-50%,-130%) scale(1.2) rotate(5deg);opacity:1} 100%{transform:translate(-50%,-220%) scale(0.8);opacity:0} }
+
+/* ══ DUST ══ */
+.dust { position:fixed; font-size:15px; pointer-events:none; z-index:150; animation:dustFade 0.65s ease-out forwards; }
+@keyframes dustFade { 0%{opacity:0.7;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-130%) scale(0.3)} }
+
+/* ══ JOYSTICK ══ */
+#joystickZone { position:fixed; bottom:36px; left:36px; width:164px; height:164px; z-index:600; }
+#joystickBase { position:absolute; inset:0; background:rgba(255,255,255,0.18); border:4px solid rgba(255,255,255,0.42); border-radius:50%; backdrop-filter:blur(4px); }
+#joystickKnob { position:absolute; width:72px; height:72px; background:radial-gradient(circle at 34% 32%,#fff8e0,#e8c040); border:4px solid #c09828; border-radius:50%; top:50%; left:50%; transform:translate(-50%,-50%); box-shadow:0 5px 18px rgba(0,0,0,0.28); }
+#joystickKnob::after { content:'🐾'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:27px; }
+
+/* ══ INTERACT BTN ══ */
+#interactBtn { position:fixed; bottom:52px; right:48px; width:104px; height:104px; background:radial-gradient(circle at 34% 32%,#ffe8a0,#f0a818); border:5px solid #c07618; border-radius:50%; font-size:40px; display:flex; align-items:center; justify-content:center; z-index:600; box-shadow:0 6px 22px rgba(0,0,0,0.22),inset 0 2px 0 rgba(255,255,255,0.4); cursor:pointer; user-select:none; transition:transform 0.1s,box-shadow 0.1s; }
+#interactBtn:active { transform:scale(0.9); box-shadow:0 3px 10px rgba(0,0,0,0.2); }
+
+/* ══ TITLE ══ */
+#titleScreen { position:fixed; inset:0; background:linear-gradient(150deg,#a0d8f0,#c0f0a0 55%,#f0e8a0); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:9999; transition:opacity 0.8s; }
+#titleScreen.fade { opacity:0; pointer-events:none; }
+.t-cappy { font-size:100px; animation:titleBounce 1s ease-in-out infinite; }
+@keyframes titleBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-22px)} }
+.t-title { font-size:58px; color:#2a7010; text-shadow:0 4px 0 #0a5000,0 8px 18px rgba(0,0,0,0.15); margin:8px 0; }
+.t-sub { font-family:'Nunito',sans-serif; font-weight:700; font-size:22px; color:#4a7020; margin-bottom:42px; }
+.t-btn { background:linear-gradient(180deg,#6ac040,#389010); border:5px solid #287008; border-radius:50px; padding:18px 62px; font-family:'Fredoka One',cursive; font-size:34px; color:white; text-shadow:0 2px 4px rgba(0,0,0,0.3); cursor:pointer; box-shadow:0 8px 0 #185000,0 12px 26px rgba(0,0,0,0.22); transition:transform 0.1s,box-shadow 0.1s; }
+.t-btn:active { transform:translateY(5px); box-shadow:0 3px 0 #185000; }
+</style>
+</head>
+<body>
+
+<!-- TITLE -->
+<div id="titleScreen">
+  <div class="t-cappy">🦫</div>
+  <div class="t-title">Cappy's Valley</div>
+  <div class="t-sub">🌸 A peaceful adventure 🌸</div>
+  <button class="t-btn" onclick="startGame()">Let's Explore! 🐾</button>
+</div>
+
+<!-- HUD (always on top) -->
+<div id="hud"><span class="htitle">🦫 Cappy's Valley</span><span id="starCount">⭐ 0 / 18</span></div>
+<div id="zoneLabel"></div>
+<div id="speech"></div>
+<div id="popup"></div>
+
+<!-- OUTDOOR WORLD -->
+<div id="gameContainer">
+  <div id="world"></div>
+</div>
+
+<!-- HOUSE INTERIOR -->
+<div id="houseContainer">
+  <div id="houseWorld"></div>
+</div>
+
+<!-- CAPPY — always fixed, always on top of everything -->
+<div id="cappy"><span id="cappy-emoji">🦫</span></div>
+
+<!-- EXIT HOUSE -->
+<button id="exitBtn" onclick="exitHouse()">🚪 Go Outside</button>
+
+<!-- JOYSTICK -->
+<div id="joystickZone">
+  <div id="joystickBase"></div>
+  <div id="joystickKnob"></div>
+</div>
+<div id="interactBtn" ontouchstart="onInteract(event)" onclick="onInteract(event)">✨</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════
+const OW = 3200, OH = 2400;        // outdoor world size
+const HW = 2800, HH = 1200;        // house world size
+const SPEED = 5;
+const TOTAL_STARS = 18;
+const SW = () => window.innerWidth, SH = () => window.innerHeight;
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let px = 1560, py = 1180;          // position (shared, context-aware)
+let camX = 0, camY = 0;
+let joyDX = 0, joyDY = 0;
+let joystickActive = false;
+let inHouse = false;
+let gameRunning = false;
+let starsCollected = 0;
+const collected = new Set();
+let lastZone = '';
+let dustTimer = 0;
+let holeCD = 0;
+const keys = {};
+
+// ══════════════════════════════════════════════
+//  DOM
+// ══════════════════════════════════════════════
+const worldEl     = document.getElementById('world');
+const houseWEl    = document.getElementById('houseWorld');
+const cappyEl     = document.getElementById('cappy');
+const cappyEmoji  = document.getElementById('cappy-emoji');
+const gameContEl  = document.getElementById('gameContainer');
+const houseContEl = document.getElementById('houseContainer');
+const exitBtn     = document.getElementById('exitBtn');
+const starCountEl = document.getElementById('starCount');
+const zoneLabelEl = document.getElementById('zoneLabel');
+const speechEl    = document.getElementById('speech');
+const popupEl     = document.getElementById('popup');
+
+// ══════════════════════════════════════════════
+//  JOYSTICK
+// ══════════════════════════════════════════════
+const jsZone = document.getElementById('joystickZone');
+const jsKnob = document.getElementById('joystickKnob');
+const KNOB_MAX = 56;
+
+function jsStart(e) { e.preventDefault(); joystickActive = true; }
+function jsMove(e) {
+  if (!joystickActive) return; e.preventDefault();
+  const t = e.touches ? e.touches[0] : e;
+  const r = jsZone.getBoundingClientRect();
+  let dx = t.clientX - (r.left + r.width/2);
+  let dy = t.clientY - (r.top  + r.height/2);
+  const d = Math.sqrt(dx*dx + dy*dy);
+  if (d > KNOB_MAX) { dx = dx/d*KNOB_MAX; dy = dy/d*KNOB_MAX; }
+  jsKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+  joyDX = dx / KNOB_MAX; joyDY = dy / KNOB_MAX;
+}
+function jsEnd(e) {
+  e.preventDefault(); joystickActive = false; joyDX = 0; joyDY = 0;
+  jsKnob.style.transform = 'translate(-50%,-50%)';
+}
+jsZone.addEventListener('touchstart', jsStart, {passive:false});
+jsZone.addEventListener('touchmove',  jsMove,  {passive:false});
+jsZone.addEventListener('touchend',   jsEnd,   {passive:false});
+jsZone.addEventListener('mousedown',  jsStart);
+document.addEventListener('mousemove', jsMove);
+document.addEventListener('mouseup',   jsEnd);
+document.addEventListener('keydown', e => keys[e.key] = true);
+document.addEventListener('keyup',   e => keys[e.key] = false);
+
+function inputVec() {
+  let dx = joyDX, dy = joyDY;
+  if (keys['ArrowLeft']  || keys['a']) dx -= 1;
+  if (keys['ArrowRight'] || keys['d']) dx += 1;
+  if (keys['ArrowUp']    || keys['w']) dy -= 1;
+  if (keys['ArrowDown']  || keys['s']) dy += 1;
+  return [dx, dy];
+}
+
+// ══════════════════════════════════════════════
+//  GAME LOOP
+// ══════════════════════════════════════════════
+function gameLoop() {
+  if (!gameRunning) return;
+  const [dx, dy] = inputVec();
+  const moving = Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05;
+
+  if (moving) {
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const maxX = inHouse ? HW - 40 : OW - 40;
+    const maxY = inHouse ? HH - 40 : OH - 40;
+    const minY = inHouse ? 40 : 310;
+    px = Math.max(40,   Math.min(maxX, px + dx/len * SPEED));
+    py = Math.max(minY, Math.min(maxY, py + dy/len * SPEED));
+    cappyEl.classList.add('moving');
+    if (dx < -0.1) cappyEmoji.style.transform = 'scaleX(-1)';
+    else if (dx > 0.1) cappyEmoji.style.transform = 'scaleX(1)';
+    dustTimer++;
+    if (dustTimer > 14) { dustTimer = 0; spawnDust(); }
+  } else {
+    cappyEl.classList.remove('moving');
+    dustTimer = 0;
+  }
+
+  updateCamera();
+
+  if (inHouse) {
+    checkHouseStars();
+    checkHouseSpots();
+  } else {
+    checkOutdoorStars();
+    checkHoles();
+    checkBridgeWobble();
+    updateZone();
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+// ══════════════════════════════════════════════
+//  CAMERA — same logic for both worlds
+// ══════════════════════════════════════════════
+function updateCamera() {
+  const WW = inHouse ? HW : OW;
+  const WH = inHouse ? HH : OH;
+  camX = Math.max(Math.min(SW()/2 - px, 0), SW() - WW);
+  camY = Math.max(Math.min(SH()/2 - py, 0), SH() - WH);
+  const worldTarget = inHouse ? houseWEl : worldEl;
+  worldTarget.style.transform = `translate(${camX}px,${camY}px)`;
+  // Cappy is fixed on screen, centred
+  cappyEl.style.left = (SW()/2 - 29) + 'px';
+  cappyEl.style.top  = (SH()/2 - 29) + 'px';
+}
+
+// ══════════════════════════════════════════════
+//  STAR COLLECTION
+// ══════════════════════════════════════════════
+function collectStar(id, el) {
+  if (collected.has(id)) return;
+  collected.add(id); starsCollected++;
+  el.classList.add('collected');
+  setTimeout(() => el.remove(), 500);
+  starCountEl.textContent = `⭐ ${starsCollected} / ${TOTAL_STARS}`;
+  showPopup(`⭐ Star found! (${starsCollected}/${TOTAL_STARS})`);
+  if (starsCollected === TOTAL_STARS) setTimeout(() => showPopup('🎉 You found ALL the stars!\nCappy is SO happy! 🦫💕'), 900);
+}
+
+function checkOutdoorStars() {
+  worldEl.querySelectorAll('.star:not(.collected)').forEach(s => {
+    const sx = parseFloat(s.style.left) + 15;
+    const sy = parseFloat(s.style.top) + 15;
+    if (Math.hypot(sx - px, sy - py) < 60) collectStar(s.dataset.sid, s);
+  });
+}
+
+function checkHouseStars() {
+  houseWEl.querySelectorAll('.istar:not(.collected)').forEach(s => {
+    const sx = parseFloat(s.style.left) + 14;
+    const sy = parseFloat(s.style.top) + 14;
+    if (Math.hypot(sx - px, sy - py) < 65) collectStar(s.dataset.sid, s);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  HOUSE INTERACTIVE SPOTS (walk-near triggers)
+// ══════════════════════════════════════════════
+let spotCD = 0;
+function checkHouseSpots() {
+  if (spotCD > 0) { spotCD--; return; }
+  houseWEl.querySelectorAll('.hspot').forEach(s => {
+    const sx = parseFloat(s.style.left) + 22;
+    const sy = parseFloat(s.style.top) + 22;
+    if (Math.hypot(sx - px, sy - py) < 80) {
+      const msgs = JSON.parse(s.dataset.msgs);
+      showSpeech(msgs[Math.floor(Math.random() * msgs.length)]);
+      spotCD = 120;
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+//  HOLES
+// ══════════════════════════════════════════════
+function checkHoles() {
+  if (holeCD > 0) { holeCD--; return; }
+  worldEl.querySelectorAll('.cappy-hole').forEach(h => {
+    const hx = parseFloat(h.style.left) + 28;
+    const hy = parseFloat(h.style.top) + 15;
+    if (Math.hypot(hx - px, hy - py) < 52) {
+      holeCD = 130;
+      const dests = [[680,1140],[2050,1460],[900,1180],[1800,1800],[1060,2000]];
+      const d = dests[Math.floor(Math.random()*dests.length)];
+      px = d[0] + (Math.random()-0.5)*160;
+      py = d[1] + (Math.random()-0.5)*160;
+      showWheee();
+    }
+  });
+}
+
+// ══════════════════════════════════════════════
+//  BRIDGE WOBBLE
+// ══════════════════════════════════════════════
+function checkBridgeWobble() {
+  worldEl.querySelectorAll('.bridge').forEach(b => {
+    const bx = parseFloat(b.style.left), by = parseFloat(b.style.top);
+    const bw = parseFloat(b.style.width), bh = parseFloat(b.style.height);
+    if (px > bx && px < bx+bw && py > by && py < by+bh)
+      b.style.transform = `rotate(${Math.sin(Date.now()/190)*1.8}deg)`;
+    else b.style.transform = '';
+  });
+}
+
+// ══════════════════════════════════════════════
+//  ZONES
+// ══════════════════════════════════════════════
+const zones = [
+  {n:'🌲 Whispering Forest', x1:0,    y1:300, x2:1000, y2:1150},
+  {n:'🌾 Veggie Farm',       x1:1000, y1:300, x2:2200, y2:820},
+  {n:'🪨 The Cliffs',        x1:2200, y1:300, x2:3200, y2:820},
+  {n:'🏡 Home Sweet Home',   x1:1200, y1:820, x2:1800, y2:1280},
+  {n:'🌸 Flower Meadow',     x1:1800, y1:820, x2:3200, y2:1280},
+  {n:'🌊 The River',         x1:0,    y1:1280,x2:3200, y2:1580},
+  {n:'🏝️ Little Island',    x1:1260, y1:1580,x2:1620, y2:1840},
+  {n:'🌿 South Meadow',      x1:0,    y1:1580,x2:1260, y2:2400},
+  {n:'🌿 East Meadow',       x1:1620, y1:1580,x2:3200, y2:2400},
+];
+let zoneFadeT;
+function updateZone() {
+  for (const z of zones) {
+    if (px >= z.x1 && px < z.x2 && py >= z.y1 && py < z.y2) {
+      if (lastZone !== z.n) {
+        lastZone = z.n; zoneLabelEl.textContent = z.n;
+        zoneLabelEl.classList.add('show');
+        clearTimeout(zoneFadeT);
+        zoneFadeT = setTimeout(() => zoneLabelEl.classList.remove('show'), 3000);
+      }
+      return;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+//  INTERACT BUTTON
+// ══════════════════════════════════════════════
+function onInteract(e) {
+  if (e) e.preventDefault();
+  if (inHouse) {
+    interactInHouse();
+  } else {
+    interactOutdoor();
+  }
+}
+
+function interactOutdoor() {
+  // animals
+  let closest = null, cd = 130;
+  worldEl.querySelectorAll('[data-type="animal"]').forEach(a => {
+    const d = Math.hypot(parseFloat(a.style.left)+17 - px, parseFloat(a.style.top)+17 - py);
+    if (d < cd) { cd = d; closest = a; }
+  });
+  if (closest) { talkTo(closest); return; }
+  // house door
+  const house = document.getElementById('house');
+  if (house) {
+    const d = Math.hypot(parseFloat(house.style.left)+47 - px, parseFloat(house.style.top)+47 - py);
+    if (d < 150) { enterHouse(); return; }
+  }
+  const funnies = ['🌸 What a beautiful day!','🦫 Cappy loves exploring!','⭐ Find all the stars!','🌊 The river sounds so nice~','🍃 The air smells like flowers!','☀️ The sun feels so warm!'];
+  showSpeech(funnies[Math.floor(Math.random()*funnies.length)]);
+}
+
+function interactInHouse() {
+  // check spots by proximity
+  let closest = null, cd = 110;
+  houseWEl.querySelectorAll('.hspot').forEach(s => {
+    const d = Math.hypot(parseFloat(s.style.left)+22 - px, parseFloat(s.style.top)+22 - py);
+    if (d < cd) { cd = d; closest = s; }
+  });
+  if (closest) {
+    const msgs = JSON.parse(closest.dataset.msgs);
+    showSpeech(msgs[Math.floor(Math.random()*msgs.length)]);
+    closest.style.transform = 'scale(1.3)';
+    setTimeout(() => closest.style.transform = '', 300);
+    return;
+  }
+  const homeFunnies = ['🏠 Home is so cozy!','🌸 What a lovely room!','✨ Wonder what\'s in the next room?','🦫 Cappy feels safe at home!'];
+  showSpeech(homeFunnies[Math.floor(Math.random()*homeFunnies.length)]);
+}
+
+function talkTo(el) {
+  const says = JSON.parse(el.dataset.says);
+  showSpeech(`${el.textContent} ${el.dataset.name}: "${says[Math.floor(Math.random()*says.length)]}"`);
+  el.style.transform = 'scale(1.4)';
+  setTimeout(() => el.style.transform = '', 300);
+}
+
+// ══════════════════════════════════════════════
+//  ENTER / EXIT HOUSE
+// ══════════════════════════════════════════════
+function enterHouse() {
+  inHouse = true;
+  gameContEl.style.display  = 'none';
+  houseContEl.classList.add('visible');
+  exitBtn.classList.add('visible');
+  // start Cappy at house entrance
+  px = 200; py = 580;
+  showSpeech('🏠 Welcome home, Cappy! 🌸');
+  updateCamera();
+}
+function exitHouse() {
+  inHouse = false;
+  houseContEl.classList.remove('visible');
+  gameContEl.style.display = 'block';
+  exitBtn.classList.remove('visible');
+  px = 1560; py = 1060;
+  showSpeech('🌿 Back outside! Fresh air! 🦫');
+  updateCamera();
+}
+
+// ══════════════════════════════════════════════
+//  FX
+// ══════════════════════════════════════════════
+function showWheee() {
+  const w = document.createElement('div');
+  w.className = 'wheee'; w.textContent = 'Wheeeee! 🌀✨';
+  document.body.appendChild(w);
+  setTimeout(() => w.remove(), 1300);
+}
+function spawnDust() {
+  const d = document.createElement('div');
+  d.className = 'dust';
+  d.textContent = ['·','•','✦','˙'][Math.floor(Math.random()*4)];
+  d.style.left = SW()/2 + 'px'; d.style.top = (SH()/2 + 26) + 'px';
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 650);
+}
+
+let speechT;
+function showSpeech(msg) {
+  speechEl.textContent = msg; speechEl.classList.add('show');
+  clearTimeout(speechT); speechT = setTimeout(() => speechEl.classList.remove('show'), 3800);
+}
+let popT;
+function showPopup(msg) {
+  popupEl.textContent = msg; popupEl.classList.add('show');
+  clearTimeout(popT); popT = setTimeout(() => popupEl.classList.remove('show'), 2200);
+}
+
+// ══════════════════════════════════════════════
+//  ELEMENT HELPERS
+// ══════════════════════════════════════════════
+function mk(tag, parent, cls, style, extra) {
+  const d = document.createElement(tag);
+  if (cls) d.className = cls;
+  if (style) d.style.cssText = style;
+  if (extra) Object.assign(d, extra);
+  if (parent) parent.appendChild(d);
+  return d;
+}
+function div(parent, cls, style, extra) { return mk('div', parent, cls, style, extra); }
+function span(parent, text, style) {
+  const s = document.createElement('span');
+  s.textContent = text; if (style) s.style.cssText = style;
+  if (parent) parent.appendChild(s); return s;
+}
+
+// ══════════════════════════════════════════════
+//  BUILD OUTDOOR WORLD
+// ══════════════════════════════════════════════
+function buildWorld() {
+  worldEl.innerHTML = '';
+
+  // Sky + base gradient
+  div(worldEl, '', `position:absolute;inset:0;background:linear-gradient(180deg,#7ec8e8 0%,#a8ddf0 14%,#6aba32 14%,#5aaa28 30%,#52a020 30%,#4e9818 55%,#508820 55%,#467818 100%);`);
+
+  // Terrain patches
+  [
+    ['forest-floor bg-base', 0,300,950,750], ['forest-floor bg-base', 0,300,300,420],
+    ['grass-lt bg-base', 1050,650,900,650],
+    ['grass-med bg-base', 0,1600,1300,800], ['grass-med bg-base', 1650,1600,1550,800],
+    ['grass-lt bg-base', 1900,680,1100,620],
+    ['dirt bg-base', 1060,300,1100,320], ['dirt-drk bg-base', 1100,310,1000,160],
+    ['cliff-top bg-base', 2200,300,800,200], ['grass bg-base', 2200,300,800,160],
+    ['sand bg-base', 1270,1610,340,220],
+  ].forEach(([cls,x,y,w,h]) => div(worldEl, cls+' bg-base', `position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;`));
+
+  // Cliff faces
+  [{x:0,y:300,w:2200,h:30},{x:2200,y:500,w:800,h:30},{x:0,y:300,w:30,h:420}].forEach(s =>
+    div(worldEl, 'bg-base cliff-face', `position:absolute;left:${s.x}px;top:${s.y}px;width:${s.w}px;height:${s.h}px;`));
+
+  // Water
+  div(worldEl,'bg-base water-body','position:absolute;left:0;top:1340px;width:3200px;height:210px;');
+  div(worldEl,'bg-base water-body','position:absolute;left:140px;top:580px;width:380px;height:250px;border-radius:55% 45% 50% 55%;');
+  [[110,550,440,310],[1350,1300,200,80]].forEach(([x,y,w,h]) =>
+    div(worldEl,'bg-base water-edge',`position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;`));
+
+  // Mud pool
+  const mud = div(worldEl,'mud-pool','position:absolute;left:2580px;top:1050px;width:280px;height:170px;');
+  div(mud,'','position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:32px;',{textContent:'🌊'});
+
+  // Paths
+  const pathH = (x,y,w,h) => div(worldEl,'path-h',`position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;`);
+  const pathV = (x,y,w,h) => div(worldEl,'path-v',`position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;`);
+  pathV(1482,820,136,620); pathH(650,1270,1100,76); pathV(350,700,80,450); pathH(350,700,450,80); pathV(1380,1640,80,140);
+  for (let i=0;i<8;i++) div(worldEl,'farm-row',`position:absolute;left:1080px;top:${330+i*38}px;width:980px;`);
+
+  // Bridges
+  [[1390,1340,220,210],[780,1340,220,210]].forEach(([x,y,w,h]) => {
+    const b = div(worldEl,'bridge',`position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:15;`);
+    b.dataset.bridge='1';
+    div(b,'bridge-rope-t'); div(b,'bridge-rope-b');
+  });
+
+  // Ladders
+  [[305,470,210],[2248,480,260]].forEach(([x,y,h]) => makeLadder(worldEl,x,y,h));
+
+  // Holes
+  [[680,1680,'h1'],[2360,820,'h2']].forEach(([x,y,id]) => {
+    const h = div(worldEl,'cappy-hole',`position:absolute;left:${x}px;top:${y}px;`);
+    h.dataset.hole=id;
+  });
+
+  // Rocks
+  [[320,800,44,34],[480,920,36,28],[1800,1100,50,38],[2100,850,40,30],[2700,1250,48,36],[900,2000,38,28],[1800,2100,44,34]].forEach(([x,y,w,h]) =>
+    div(worldEl,'rock',`position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;`));
+
+  // Trees
+  [
+    ...[  [80,310,'big'],[160,330,'big'],[260,340,'big'],[380,300,'big'],[500,310,'big'],
+      [620,320,'med'],[720,300,'big'],[840,310,'big'],[940,330,'med'],
+      [100,400,'med'],[200,420,'big'],[330,440,'med'],[460,410,'big'],
+      [580,430,'med'],[700,420,'big'],[820,400,'med'],[920,440,'sm'],
+      [120,520,'sm'],[240,530,'med'],[400,510,'sm'],[540,540,'med'],
+      [660,520,'sm'],[760,500,'med'],[880,530,'sm'],
+      [100,630,'sm'],[260,620,'sm'],[420,640,'sm'],[580,610,'sm'] ].map(([x,y,s])=>({x,y,s,v:''})),
+    ...[[730,600,'med'],[810,590,'sm'],[880,620,'med']].map(([x,y,s])=>({x,y,s,v:'autumn'})),
+    ...[[1060,880,'med'],[1180,860,'sm'],[1950,870,'med'],[2080,890,'sm']].map(([x,y,s])=>({x,y,s,v:'blossom'})),
+    ...[[2500,310,'big'],[2620,300,'big'],[2760,320,'med'],[2880,310,'big'],[3000,330,'med'],[3100,300,'big'],
+      [2540,400,'med'],[2680,410,'big'],[2820,420,'med'],[2960,400,'big'],
+      [2480,500,'sm'],[2640,510,'med'],[2780,520,'sm'],[2920,510,'med']].map(([x,y,s])=>({x,y,s,v:''})),
+    ...[[180,1650,'med'],[340,1700,'med'],[520,1750,'sm'],[80,1820,'sm'],[680,1820,'med'],
+      [2780,1650,'med'],[2920,1700,'med'],[3050,1730,'sm'],[3140,1800,'sm'],
+      [900,2100,'sm'],[1100,2150,'sm'],[1300,2100,'sm'],[1500,2180,'sm'],
+      [1800,2100,'sm'],[2000,2150,'sm'],[2200,2100,'sm']].map(([x,y,s])=>({x,y,s,v:''})),
+    ...[[2250,310,'pine'],[2340,300,'pine'],[2860,310,'pine'],[2970,300,'pine']].map(([x,y,s])=>({x,y,s,v:'pine'})),
+  ].forEach(t => makeOutdoorTree(t.x,t.y,t.s,t.v));
+
+  // Bushes
+  [[420,780,'grn',50,40],[580,840,'drk',40,32],[680,760,'grn',44,36],[820,780,'drk',52,42],
+   [1060,700,'grn',46,38],[1900,750,'grn',48,40],[2100,700,'drk',44,36],[2300,780,'grn',50,40],
+   [2600,750,'drk',42,34],[1300,2000,'grn',46,38],[1700,1950,'grn',44,36],[500,1900,'drk',48,40],
+   [2900,1900,'grn',44,36],[200,2100,'drk',40,32],[2200,2000,'grn',46,38]].forEach(([x,y,t,w,h]) =>
+    div(worldEl,`bush bush-${t}`,`position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;`));
+
+  // Mushrooms
+  [[220,700],[360,820],[500,750],[640,840],[780,720]].forEach(([x,y]) => {
+    const m = div(worldEl,'mushroom',`left:${x}px;top:${y}px;animation-delay:${(Math.random()*3).toFixed(1)}s`);
+    m.textContent = '🍄';
+  });
+
+  // Flowers + butterflies
+  [[1020,740,'🌸'],[1120,720,'🌼'],[1220,760,'🌺'],[1320,730,'🌷'],
+   [1720,740,'🌻'],[1820,710,'🌸'],[1920,750,'🌼'],[2020,720,'🌺'],
+   [380,1650,'🌸'],[480,1700,'🌼'],[620,1680,'🌷'],[280,1750,'🌺'],
+   [2180,1650,'🌺'],[2300,1700,'🌸'],[2440,1680,'🌼'],[2600,1650,'🌷'],
+   [1380,1640,'🌸'],[1440,1680,'🌼'],[880,450,'🌼'],[980,430,'🌸'],[1100,460,'🌷'],
+   [2260,350,'🌸'],[2380,330,'🌼'],[2500,360,'🌷'],
+   [1020,2000,'🌸'],[1200,2050,'🌼'],[1600,2000,'🌺'],[1900,2050,'🌷']].forEach(([x,y,e]) => {
+    const f = div(worldEl,'flower',`left:${x}px;top:${y}px;animation-delay:${(Math.random()*2).toFixed(1)}s`);
+    f.textContent = e;
+  });
+  [[1100,670],[1750,690],[2150,640],[460,1600],[2720,1600],[1440,600]].forEach(([x,y]) => {
+    const b = div(worldEl,'flower',`left:${x}px;top:${y}px;font-size:26px;animation:butterflyFly ${(5+Math.random()*4).toFixed(1)}s ease-in-out infinite;animation-delay:${(Math.random()*4).toFixed(1)}s`);
+    b.textContent = '🦋';
+  });
+
+  // Animals
+  [
+    {x:1010,y:1000,e:'🦔',n:'Hedgie',says:['Sniff sniff! Hello! 🌿','I love bugs! 🐛','My spines keep me safe! ✨']},
+    {x:1820,y:1000,e:'🦌',n:'Dapple',says:['Hello friend! 🌟','The forest is so pretty today! 🌲','I love eating leaves! 🍃']},
+    {x:580, y:1450,e:'🦆',n:'Quacky',says:['Quack quack! 🌊','I love swimming! 💦','Water is the best! 🦆']},
+    {x:1680,y:1450,e:'🦆',n:'Ducky', says:['Quack! Any fish today? 🐟','The river is lovely! 💙','Quaaack! 🎵']},
+    {x:2660,y:1200,e:'🐢',n:'Shelly',says:['Slowly but surely! 🐢','I carry my home everywhere! 🏠','Life is good when you go slow 🌸']},
+    {x:880, y:1820,e:'🐇',n:'Flops', says:['Boing boing! 🌸','Carrots are the best! 🥕','I have very fluffy ears! 👂']},
+    {x:2260,y:1820,e:'🦋',n:'Sparkle',says:['I used to be a caterpillar! 🐛','Flying is magical! ✨','Every flower is a treasure! 🌸']},
+    {x:1390,y:640, e:'🦫',n:'Chubby',wander:true,says:["I'm Cappy's cousin! 🦫","We capybaras LOVE water! 🌊","Napping by the river is the BEST 😴"]},
+    {x:2760,y:460, e:'🦫',n:'Fluffy',wander:true,says:['Being a capybara is the BEST! 🦫','I can swim super fast! 🌊','Want to be friends? 🌸']},
+    {x:480, y:370, e:'🦌',n:'Bambi', says:['Shh, the forest is magical 🌲','I saw a rainbow! 🌈','So nice to meet you! 🌟']},
+    {x:1420,y:1700,e:'🐢',n:'Islander',says:['Welcome to my island! 🏝️','I found treasure here! 💎','Best sunsets are from here! 🌅']},
+    {x:2460,y:370, e:'🦫',n:'Mounty',says:['The view is amazing! 🏔️','I hiked up the rope ladder! 💪','You can see the whole valley! 🌄']},
+    {x:1200,y:2000,e:'🐑',n:'Woolly',says:['Baaaa! 🐑','My wool is super fluffy! 🌸','I love eating grass! 🌿']},
+    {x:2100,y:2000,e:'🦊',n:'Foxy',  says:['Hello! I am very sneaky 🦊','But I am friendly too! 🌸','Have you seen any berries? 🫐']},
+  ].forEach(a => {
+    const d = div(worldEl, 'animal'+(a.wander?' wander':''), `left:${a.x}px;top:${a.y}px;animation-delay:${(Math.random()*2).toFixed(1)}s`);
+    d.textContent = a.e; d.dataset.type='animal'; d.dataset.name=a.n; d.dataset.says=JSON.stringify(a.says);
+  });
+
+  // House
+  const house = div(worldEl,'',`position:absolute;left:1482px;top:950px;font-size:95px;cursor:pointer;z-index:30;`);
+  house.id='house'; house.textContent='🏠'; house.dataset.type='house';
+
+  // Outdoor stars
+  [[380,520],[880,310],[1500,460],[2280,390],[2760,650],
+   [180,1580],[660,1960],[1500,2060],[2480,1960],[2880,1560],
+   [1060,1120],[2060,1120]].forEach(([x,y],i) => {
+    const s = div(worldEl,'star',`left:${x}px;top:${y}px;`);
+    s.textContent='⭐'; s.dataset.sid=`os${i}`;
+  });
+
+  // Clouds
+  [[280,70,220,65,14],[780,40,170,52,19],[1380,90,250,72,16],
+   [1980,55,190,58,21],[2580,80,215,67,11],[900,160,140,45,25]].forEach(([x,y,w,h,spd]) => {
+    const c = div(worldEl,'cloud',`left:${x}px;top:${y}px;width:${w}px;height:${h}px;animation-duration:${spd}s`);
+    div(c,'',`position:absolute;width:${w*.58}px;height:${w*.55}px;background:white;border-radius:50%;top:-${h*.42}px;left:${w*.12}px`);
+    div(c,'',`position:absolute;width:${w*.44}px;height:${w*.42}px;background:white;border-radius:50%;top:-${h*.32}px;left:${w*.44}px`);
+  });
+
+  // Island
+  div(worldEl,'',`position:absolute;left:1280px;top:1590px;width:320px;height:220px;background:radial-gradient(ellipse,#7ad044 0%,#5aaa28 65%,#4ab8e8 100%);border-radius:50%;border:4px solid #7ad044;z-index:8;`);
+  [[1360,1660,'🌸'],[1420,1700,'🌼'],[1500,1650,'🌺']].forEach(([x,y,e]) => {
+    const f = div(worldEl,'flower',`left:${x}px;top:${y}px;font-size:20px;`); f.textContent=e;
+  });
+}
+
+function makeOutdoorTree(x, y, size, variant) {
+  const cls = `tree tree-${size==='pine'?'med':size}${variant?' tree-'+variant:''}`;
+  const t = div(worldEl, cls, `position:absolute;left:${x}px;top:${y}px;animation-delay:${(Math.random()*3).toFixed(1)}s`);
+  if (size === 'pine') {
+    t.innerHTML = `<div style="width:60px;height:80px;background:#2a7018;clip-path:polygon(50% 0%,100% 100%,0% 100%);"></div><div style="width:12px;height:20px;background:#8b6040;border-radius:3px;margin:0 auto;"></div>`;
+  } else {
+    const tc = variant==='autumn'?'background:#c86020;':variant==='blossom'?'background:#e090c0;':'';
+    t.innerHTML = `<div class="tree-top" style="${tc}"></div><div class="tree-trunk"></div><div class="tree-shadow"></div>`;
+  }
+}
+
+function makeLadder(parent, x, y, h) {
+  const d = div(parent,'rope-ladder',`left:${x}px;top:${y}px;height:${h}px;justify-content:flex-start;padding-top:8px;`);
+  for (let i=0; i < Math.floor(h/26); i++) div(d,'ladder-rung');
+}
+
+// ══════════════════════════════════════════════
+//  BUILD HOUSE INTERIOR
+// ══════════════════════════════════════════════
+function buildHouse() {
+  houseWEl.innerHTML = '';
+
+  // ── LAYOUT ──
+  // The house is one big 2800×1200 space
+  // Row 1 (y=60..560): Kitchen | Living Room | Bedroom | Garden Room
+  // Row 2 (y=640..1140): Bathroom | Lego Room | Secret Room | Hallway/stairs
+  // Thick outer wall, open doorway gaps between rooms
+
+  const WALL = 20;   // wall thickness
+  const GAP  = 80;   // doorway width
+  const R1T  = 60;   // row 1 top
+  const R1B  = 560;  // row 1 bottom
+  const R2T  = 640;  // row 2 top
+  const R2B  = 1140; // row 2 bottom
+  const MID  = 600;  // corridor y
+
+  // Room x positions
+  const rooms = [
+    {id:'kitchen',  x:60,   y:R1T, w:620, h:500},
+    {id:'living',   x:720,  y:R1T, w:620, h:500},
+    {id:'bedroom',  x:1380, y:R1T, w:620, h:500},
+    {id:'garden',   x:2040, y:R1T, w:700, h:500},
+    {id:'bathroom', x:60,   y:R2T, w:620, h:500},
+    {id:'lego',     x:720,  y:R2T, w:620, h:500},
+    {id:'secret',   x:1380, y:R2T, w:620, h:500},
+    {id:'hall',     x:2040, y:R2T, w:700, h:500},
+  ];
+
+  // Draw floors
+  const floors = {
+    kitchen:  'hw-wood',
+    living:   'hw-carpet',
+    bedroom:  'hw-tile-p',
+    garden:   'hw-grass',
+    bathroom: 'hw-tile-b',
+    lego:     'hw-lego',
+    secret:   'hw-secret',
+    hall:     'hw-wood',
+  };
+
+  rooms.forEach(r => {
+    div(houseWEl, `hw-bg ${floors[r.id]}`, `position:absolute;left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px;`);
+  });
+
+  // Hallway corridor strip between rows
+  div(houseWEl,'hw-bg hw-wood',`position:absolute;left:60px;top:${R1B}px;width:2680px;height:${R2T-R1B}px;`);
+
+  // Outer walls (thick border)
+  // top wall
+  div(houseWEl,'hw-bg',`position:absolute;left:0;top:0;width:2800px;height:60px;background:#b89050;border-bottom:4px solid #8a6020;`);
+  // bottom wall
+  div(houseWEl,'hw-bg',`position:absolute;left:0;top:${R2B}px;width:2800px;height:60px;background:#b89050;border-top:4px solid #8a6020;`);
+  // left wall
+  div(houseWEl,'hw-bg',`position:absolute;left:0;top:0;width:60px;height:1200px;background:#b89050;border-right:4px solid #8a6020;`);
+  // right wall
+  div(houseWEl,'hw-bg',`position:absolute;left:2740px;top:0;width:60px;height:1200px;background:#b89050;border-left:4px solid #8a6020;`);
+
+  // Internal walls between rooms (vertical dividers with doorway gaps)
+  // Row 1 dividers
+  [[680,R1T],[1340,R1T],[2000,R1T]].forEach(([wx,wy]) => {
+    // wall above doorway
+    div(houseWEl,'hw-bg',`position:absolute;left:${wx}px;top:${wy}px;width:20px;height:180px;background:#b89050;`);
+    // doorway gap (180..260)
+    // wall below doorway
+    div(houseWEl,'hw-bg',`position:absolute;left:${wx}px;top:${wy+260}px;width:20px;height:${R1B-wy-260}px;background:#b89050;`);
+  });
+  // Row 2 dividers
+  [[680,R2T],[1340,R2T],[2000,R2T]].forEach(([wx,wy]) => {
+    div(houseWEl,'hw-bg',`position:absolute;left:${wx}px;top:${wy}px;width:20px;height:180px;background:#b89050;`);
+    div(houseWEl,'hw-bg',`position:absolute;left:${wx}px;top:${wy+260}px;width:20px;height:${R2B-wy-260}px;background:#b89050;`);
+  });
+  // Corridor horizontal walls (with doorway gaps into each room)
+  // bottom of row1 rooms — gaps at each room center
+  rooms.slice(0,4).forEach(r => {
+    const mid = r.x + r.w/2;
+    div(houseWEl,'hw-bg',`position:absolute;left:${r.x}px;top:${R1B}px;width:${mid - r.x - GAP/2}px;height:20px;background:#b89050;`);
+    div(houseWEl,'hw-bg',`position:absolute;left:${mid+GAP/2}px;top:${R1B}px;width:${r.x+r.w-(mid+GAP/2)}px;height:20px;background:#b89050;`);
+  });
+  // top of row2 rooms — same gaps
+  rooms.slice(4).forEach(r => {
+    const mid = r.x + r.w/2;
+    div(houseWEl,'hw-bg',`position:absolute;left:${r.x}px;top:${R2T-20}px;width:${mid - r.x - GAP/2}px;height:20px;background:#b89050;`);
+    div(houseWEl,'hw-bg',`position:absolute;left:${mid+GAP/2}px;top:${R2T-20}px;width:${r.x+r.w-(mid+GAP/2)}px;height:20px;background:#b89050;`);
+  });
+
+  // Windows on top wall of row1 rooms
+  rooms.slice(0,4).forEach(r => {
+    const win = div(houseWEl,'hw-window',`position:absolute;left:${r.x+r.w/2-45}px;top:66px;width:90px;height:70px;z-index:8;`);
+    div(win,'curtain-l'); div(win,'curtain-r');
+    // tiny outdoor scene
+    div(win,'',`position:absolute;bottom:4px;left:4px;right:4px;height:28px;background:linear-gradient(#7ec8e8,#6aba32 60%);border-radius:2px;font-size:14px;display:flex;align-items:flex-end;justify-content:center;`,{textContent:'🌳'});
+  });
+
+  // Room labels
+  const labels = {kitchen:'🍳 Kitchen',living:'🛋️ Living Room',bedroom:'🛏️ Bedroom',garden:'🌿 Garden Room',bathroom:'🛁 Bathroom',lego:'🧱 Lego Room',secret:'✨ Secret Room',hall:'🪴 Hallway'};
+  rooms.forEach(r => {
+    const l = div(houseWEl,'room-name',`position:absolute;left:${r.x+r.w/2}px;top:${r.y+14}px;transform:translateX(-50%);`);
+    l.textContent = labels[r.id];
+  });
+
+  // ── KITCHEN (x:60, y:60, 620×500) ──
+  // Counters along top and left
+  div(houseWEl,'hw-bg',`position:absolute;left:70px;top:70px;width:600px;height:80px;background:#e0b870;border:4px solid #b08040;border-radius:6px;z-index:5;`); // counter top
+  div(houseWEl,'hw-bg',`position:absolute;left:70px;top:70px;width:80px;height:300px;background:#e0b870;border:4px solid #b08040;border-radius:6px;z-index:5;`); // counter left
+  // spots
+  hspot(houseWEl, 180, 90, '🧊', ['Brrrr! Cold watermelon inside! 🍉','My favourite snack is in here! 🦫','Ooh! Juice! 🥤'], 'fridge');
+  hspot(houseWEl, 350, 90, '🔥', ['Something smells yummy! 🍲','Cooking is so fun! 👨‍🍳','Cappy made soup! 🥣'], 'stove');
+  hspot(houseWEl, 500, 90, '🚿', ['Splish splash! 🫧','The water is nice and warm! 💧','Washing up time! 🧼'], 'sink');
+  hspot(houseWEl, 80, 200, '🥕', ['Yummy carrots! 🥕 Cappy\'s favourite!','Fresh from the garden! 🌿','So crunchy! 😋'], 'carrot');
+  hspot(houseWEl, 80, 300, '🍉', ['WATERMELON!! 🍉 The best!!','So juicy and sweet! 😍','Cappy loves watermelon! 🦫💕'], 'melon');
+  // table
+  div(houseWEl,'furn-big',`position:absolute;left:300px;top:280px;`, {textContent:'🪑'});
+  div(houseWEl,'furn',`position:absolute;left:380px;top:300px;`, {textContent:'🍽️'});
+  div(houseWEl,'furn',`position:absolute;left:450px;top:300px;`, {textContent:'🥛'});
+  div(houseWEl,'furn',`position:absolute;left:340px;top:360px;`, {textContent:'🫖'});
+  div(houseWEl,'furn-sm wallart',`position:absolute;left:200px;top:80px;`, {textContent:'🌿'});
+  div(houseWEl,'furn-sm wallart',`position:absolute;left:580px;top:80px;`, {textContent:'📅'});
+  // kitchen star
+  istar(houseWEl, 560, 450, 'hs0');
+
+  // ── LIVING ROOM (x:720, y:60, 620×500) ──
+  hspot(houseWEl, 730, 200, '📺', ['Cappy\'s favourite show is on! 📺🦫','Ooh! A nature documentary! 🌿','This is the best show! ⭐'], 'tv');
+  hspot(houseWEl, 950, 350, '🛋️', ['So comfy!! 😴','This sofa is the squishiest! 🛋️','Perfect nap spot! 🦫💤'], 'sofa');
+  hspot(houseWEl, 1180, 200, '📚', ['So many stories! 📖✨','Cappy loves reading! 🦫','Which book next? 🤔'], 'shelf');
+  div(houseWEl,'furn-big',`position:absolute;left:930px;top:340px;`, {textContent:'🛋️'});
+  div(houseWEl,'furn-big',`position:absolute;left:730px;top:160px;`, {textContent:'📺'});
+  div(houseWEl,'furn',`position:absolute;left:740px;top:340px;`, {textContent:'🪴'});
+  div(houseWEl,'furn',`position:absolute;left:1270px;top:340px;`, {textContent:'🕯️'});
+  div(houseWEl,'furn-sm wallart',`position:absolute;left:840px;top:80px;`, {textContent:'🖼️'});
+  div(houseWEl,'furn-sm wallart',`position:absolute;left:1100px;top:80px;`, {textContent:'🌸'});
+  div(houseWEl,'furn',`position:absolute;left:1170px;top:160px;`, {textContent:'📚'});
+  istar(houseWEl, 1200, 450, 'hs1');
+
+  // ── BEDROOM (x:1380, y:60, 620×500) ──
+  hspot(houseWEl, 1420, 280, '🛏️', ['Zzz... so comfy! 😴💤','The pillow is so fluffy! 🌸','Sweet dreams, Cappy! 🌙'], 'bed');
+  hspot(houseWEl, 1700, 280, '🧸', ['My favourite stuffed friend! 🧸','This is Mochi the capybara! 🦫','We go everywhere together! 💕'], 'bear');
+  hspot(houseWEl, 1900, 200, '🌙', ['Goodnight stars! 🌟','The moon is so beautiful 🌙','Time to make a wish! ⭐'], 'moon');
+  div(houseWEl,'furn-big',`position:absolute;left:1420px;top:240px;`, {textContent:'🛏️'});
+  div(houseWEl,'furn-big',`position:absolute;left:1680px;top:250px;`, {textContent:'🧸'});
+  div(houseWEl,'furn',`position:absolute;left:1870px;top:250px;`, {textContent:'🪔'});
+  div(houseWEl,'furn',`position:absolute;left:1870px;top:350px;`, {textContent:'🪴'});
+  div(houseWEl,'furn-sm wallart',`position:absolute;left:1500px;top:80px;`, {textContent:'⭐'});
+  div(houseWEl,'furn-sm wallart',`position:absolute;left:1700px;top:80px;`, {textContent:'🌙'});
+  div(houseWEl,'furn-sm wallart',`position:absolute;left:1850px;top:80px;`, {textContent:'☁️'});
+  // little rug
+  div(houseWEl,'hw-bg',`position:absolute;left:1440px;top:440px;width:280px;height:100px;background:radial-gradient(ellipse,#f0a0c0,#c06080);border-radius:50%;opacity:0.6;`);
+  istar(houseWEl, 1950, 470, 'hs2');
+
+  // ── GARDEN ROOM (x:2040, y:60, 700×500) ──
+  hspot(houseWEl, 2080, 200, '🌻', ['So tall and sunny! 🌻☀️','This sunflower reaches the ceiling! 😮','Cappy waters it every day! 💧'], 'sunflower');
+  hspot(houseWEl, 2350, 150, '🌈', ['A rainbow! Inside the house! 🌈','Cappy made this with a prism! ✨','So many colours! 🎨'], 'rainbow');
+  hspot(houseWEl, 2580, 250, '🦋', ['A butterfly lives in this room! 🦋','It loves the flowers! 🌸','So magical! ✨'], 'butterfly2');
+  div(houseWEl,'furn-big',`position:absolute;left:2080px;top:160px;`, {textContent:'🌻'});
+  div(houseWEl,'furn-big',`position:absolute;left:2180px;top:200px;`, {textContent:'🪴'});
+  div(houseWEl,'furn-big',`position:absolute;left:2300px;top:180px;`, {textContent:'🌺'});
+  div(houseWEl,'furn-big',`position:absolute;left:2440px;top:200px;`, {textContent:'🌿'});
+  div(houseWEl,'furn',`position:absolute;left:2600px;top:200px;`, {textContent:'🦋'});
+  div(houseWEl,'furn',`position:absolute;left:2620px;top:350px;`, {textContent:'🌸'});
+  // little pond inside
+  div(houseWEl,'hw-bg',`position:absolute;left:2080px;top:380px;width:200px;height:120px;background:radial-gradient(ellipse,#60c0f0,#3090c0);border-radius:50%;border:3px solid #80d0ff;`);
+  div(houseWEl,'furn-sm',`position:absolute;left:2140px;top:420px;`,{textContent:'🐟'});
+  istar(houseWEl, 2650, 470, 'hs3');
+
+  // ── BATHROOM (x:60, y:640, 620×500) ──
+  hspot(houseWEl, 80, 780, '🛁', ['Bath time! Cappy LOVES water! 🌊','The bubbles tickle! 🫧','Best. Bath. Ever! 🛁✨'], 'bath');
+  hspot(houseWEl, 300, 730, '🐥', ['Quack! My rubber ducky! 🐥','We have the BEST bath times! 🛁','Squeaky squeaky! 🎵'], 'duck');
+  hspot(houseWEl, 550, 750, '🪥', ['Brush brush brush! 🦷','Shiny teeth! ✨','Cappy has the cleanest teeth! 🦫'], 'brush');
+  div(houseWEl,'furn-big',`position:absolute;left:80px;top:740px;`, {textContent:'🛁'});
+  div(houseWEl,'furn',`position:absolute;left:300px;top:760px;`, {textContent:'🐥'});
+  div(houseWEl,'furn',`position:absolute;left:500px;top:760px;`, {textContent:'🪥'});
+  div(houseWEl,'furn',`position:absolute;left:550px;top:840px;`, {textContent:'🧴'});
+  // tiles detail — little fishy wallart
+  div(houseWEl,'furn-sm wallart',`position:absolute;left:100px;top:660px;`, {textContent:'🐠'});
+  div(houseWEl,'furn-sm wallart',`position:absolute;left:280px;top:660px;`, {textContent:'🐟'});
+  div(houseWEl,'furn-sm wallart',`position:absolute;left:460px;top:660px;`, {textContent:'🐡'});
+  // mirror
+  div(houseWEl,'hw-bg',`position:absolute;left:500px;top:680px;width:120px;height:90px;background:linear-gradient(135deg,#c0e8ff,#e8f8ff);border:5px solid #c8a050;border-radius:8px;font-size:36px;display:flex;align-items:center;justify-content:center;`,{textContent:'🦫'});
+  istar(houseWEl, 570, 1080, 'hs4');
+
+  // ── LEGO ROOM (x:720, y:640, 620×500) ──
+  hspot(houseWEl, 800, 800, '🏰', ['I built this castle myself! 🏰✨','It has a drawbridge! 🚪','The king lives here! 👑'], 'castle');
+  hspot(houseWEl, 1050, 760, '🚀', ['To the moon!! 🚀🌙','This rocket goes REALLY fast! 💨','5... 4... 3... 2... 1... BLAST OFF! 🔥'], 'rocket');
+  hspot(houseWEl, 1220, 840, '🏠', ['A Lego house! 🏠','Just like Cappy\'s real house! 🦫','Lego everything! 🧱'], 'legohouse');
+  div(houseWEl,'furn-big',`position:absolute;left:790px;top:760px;`, {textContent:'🏰'});
+  div(houseWEl,'furn-big',`position:absolute;left:1040px;top:720px;`, {textContent:'🚀'});
+  div(houseWEl,'furn-big',`position:absolute;left:1210px;top:800px;`, {textContent:'🏠'});
+  // scattered bricks on floor
+  ['🟥','🟦','🟨','🟩','🟧','🟥','🟦','🟨'].forEach((b,i) => {
+    div(houseWEl,'furn-sm',`position:absolute;left:${730+i*70}px;top:${1050+Math.sin(i)*20}px;`,{textContent:b});
+  });
+  // big bin of bricks
+  div(houseWEl,'hw-bg',`position:absolute;left:730px;top:660px;width:80px;height:80px;background:#e83020;border:3px solid #a01010;border-radius:8px;font-size:24px;display:flex;align-items:center;justify-content:center;`,{textContent:'🧱'});
+  istar(houseWEl, 1270, 660, 'hs5');
+
+  // ── SECRET ROOM (x:1380, y:640, 620×500) ──
+  // star-like particles in background
+  for (let i=0; i<20; i++) {
+    div(houseWEl,'furn-sm wallart',`position:absolute;left:${1390+Math.random()*600}px;top:${650+Math.random()*480}px;animation:starFloat ${2+Math.random()*2}s ease-in-out infinite;animation-delay:${Math.random()*3}s;opacity:0.7;`,{textContent:['✨','⭐','💫','🌟'][Math.floor(Math.random()*4)]});
+  }
+  hspot(houseWEl, 1500, 820, '💎', ['A magic gem! 💎✨','It glows in the dark! 🌟','Worth a thousand stars! ⭐'], 'gem');
+  hspot(houseWEl, 1700, 780, '🌈', ['A rainbow bridge! 🌈','It leads to magic lands! ✨','So many colours! 🎨💕'], 'rainbow2');
+  hspot(houseWEl, 1880, 820, '🏆', ['The Cappy Champion Trophy! 🏆','For being the best explorer! 🦫','You found the secret room! ⭐'], 'trophy');
+  div(houseWEl,'furn-big',`position:absolute;left:1490px;top:780px;`,{textContent:'💎'});
+  div(houseWEl,'furn-big',`position:absolute;left:1690px;top:740px;`,{textContent:'🌈'});
+  div(houseWEl,'furn-big',`position:absolute;left:1870px;top:780px;`,{textContent:'🏆'});
+  // golden capybara statue
+  div(houseWEl,'furn-big',`position:absolute;left:1600px;top:900px;font-size:52px;filter:drop-shadow(0 0 16px gold);animation:starFloat 2s ease-in-out infinite;`,{textContent:'🦫'});
+  div(houseWEl,'hw-bg',`position:absolute;left:1590px;top:960px;width:80px;height:12px;background:gold;border-radius:4px;`);
+  istar(houseWEl, 1940, 660, 'hs6');
+
+  // ── HALLWAY / STAIRS (x:2040, y:640, 700×500) ──
+  div(houseWEl,'furn-big',`position:absolute;left:2100px;top:750px;`,{textContent:'🪴'});
+  div(houseWEl,'furn-big',`position:absolute;left:2550px;top:750px;`,{textContent:'🪴'});
+  div(houseWEl,'furn',`position:absolute;left:2300px;top:780px;`,{textContent:'🖼️'});
+  div(houseWEl,'furn',`position:absolute;left:2400px;top:780px;`,{textContent:'📸'});
+  // Staircase visual
+  for (let s=0; s<6; s++) {
+    div(houseWEl,'hw-bg',`position:absolute;left:${2180+s*60}px;top:${900-s*30}px;width:${420-s*60}px;height:30px;background:#c89050;border:2px solid #a07030;border-radius:3px 3px 0 0;z-index:${s+5};`);
+  }
+  div(houseWEl,'furn-sm wallart',`position:absolute;left:2160px;top:660px;`,{textContent:'⬆️'});
+  div(houseWEl,'hw-bg',`position:absolute;left:2155px;top:680px;width:100px;height:20px;background:#c89050;border-radius:4px;font-size:11px;display:flex;align-items:center;justify-content:center;color:#6a3010;font-family:\'Fredoka One\',cursive;`,{textContent:'upstairs'});
+  // house stars on walls
+  istar(houseWEl, 2680, 680, 'hs7');
+
+  // extra outdoor star bonus in hall
+  hspot(houseWEl, 2340, 700, '🗺️', ['This map shows all of Cappy\'s Valley! 🗺️','So many places to explore! 🌍','I wonder what\'s past the cliffs... 🪨'], 'map');
+}
+
+function hspot(parent, x, y, emoji, msgs, key) {
+  const s = div(parent, 'hspot', `position:absolute;left:${x}px;top:${y}px;`);
+  s.textContent = emoji; s.dataset.msgs = JSON.stringify(msgs); s.dataset.key = key;
+}
+
+function istar(parent, x, y, id) {
+  if (collected.has(id)) return;
+  const s = div(parent, 'istar', `position:absolute;left:${x}px;top:${y}px;`);
+  s.textContent = '⭐'; s.dataset.sid = id;
+}
+
+// ══════════════════════════════════════════════
+//  START
+// ══════════════════════════════════════════════
+function startGame() {
+  document.getElementById('titleScreen').classList.add('fade');
+  setTimeout(() => document.getElementById('titleScreen').remove(), 800);
+  buildWorld();
+  buildHouse();
+  updateCamera();
+  gameRunning = true;
+  gameLoop();
+}
+</script>
+</body>
+</html>
